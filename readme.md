@@ -45,7 +45,7 @@ class([ name ] extends [ base ],
 function([function type], [function name], ([function args]),
 		[function body]
 )
-```C
+```
 
 
 Cast to C compatible function pointer : `raw_function(void,[ name ],(void*, void*))`
