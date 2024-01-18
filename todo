@@ -1,0 +1,86 @@
+- prototype definition.
+	- [x] class
+	- function
+	- lambda
+- class should define base function only once and not redefine them in constructor
+- interface 'implements?' check by looking if all methods had beed implemented
+- linked list
+- tree
+- string
+- any (make any using both primitives and the class tree)
+- chunck cedilla.h into class.m / class.h etc
+- check if a pointer is a class by using the class tree
+	- englobe the class* inside something and/or dont forget to. Bohem GC Weak reference ?
+- make an instanceof function using a class tree
+- generic print (using both primitives and the class tree)
+- [x] class meta prototype definition :
+```C
+	class_meta_prototype([name] extends [base], (
+			(type1, name1),
+			...
+		),
+		([type1], [method1], ([args1])),
+		...
+	)
+
+	// --> will call class_prototype(...) but also create :
+
+	[name]_iterator([name], [callback],
+		[callback](STR(type1), &name1);
+		...
+		[callback](STR(typeN), &nameN);
+	)
+```
+
+- find a way for auto of a folder (would generate an headerfile ?)
+- try to Block_release in class impl for method
+- c-coroutine wrapper using : https://zelang-dev.github.io/c-coroutine/
+	- filesystem
+	- networking
+	- database
+- coding style, make semicolons useless after a continue, a return and a break
+- ability to load plain C code at runtime (maybe expose a more generic way with bash cli and compiler path? Also note that code would be in global namespace)
+- transpile gcc nested function to function()
+```C
+	#include "path/to/plain/c.h"
+	extern("C",
+		#include "path/to/plain/c.c"
+	)
+```
+- extensible macro engine (that would break compatibilty with C by adding a syntax free liberty. Should also implement CPP preprocessor.), 'any' detection for optimisation. Implement automatic ref couting.
+```C
+	// Set of primitives macro.
+	// They may be overriden to totally change the syntax or add behaviour in any program at compile time.
+	macro (
+		parsers->add(lambda(...,(const char *str),
+			if (*str == '(')
+			// ... add an ast node for a parenthesis
+		))
+		parsers->add(lambda(...,(cedilla_context ctx, const char *str),
+			if (ctx->col == 1 && *str == '/' && str[1] == '/')
+			// ... add an ast node for a comment
+		))
+		// ...
+		ast->on(lambda(...,(ast tree)
+			cursor = match_ast(
+				match_node(lambda ( ... return node->type == OPENING_PARENTHESES ));
+				match_nodes_until(lambda( ( ... return tree->last->type == CLOSING_PARENTHESIS)));
+			);
+			if (!cursor.success)
+				return NEXT_LISTENER;
+			// Here we loop back until the opening one
+			// Then we alter the tree to add a new node..
+			return RESTART_PREPROCESSING_AT_CURSORR;
+		))
+	)
+
+
+```
+- Goal is reach full syntax liberty. Using our a macro system and transpilation to tinycc pure C code. WHich means flatify all custom syntaxes (function, lambda, classes.. + user provided ones) to pure c.
+
+```
+	More readable code ----------> Better compiler and language extensions
+		^							|
+		|							|
+		----------------------------+
+```
