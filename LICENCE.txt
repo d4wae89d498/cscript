@@ -1,0 +1,31 @@
+Licence pour le langage de programmation C Cédille et le compilateur Cédille
+
+Version 1.1, 14/07/2023
+
+Auteur : d4wae89d498 (sous pseudonyme)
+
+Autorisation et restrictions d'utilisation :
+
+1. Toute utilisation du langage de programmation C Cédille et du compilateur Cédille est soumise aux termes de cette licence.
+
+2. L'utilisation à des fins commerciales sans l'autorisation expresse du créateur originel est strictement interdite.
+
+3. Toute personne souhaitant créer une version dérivée (fork) du langage C Cédille ou du compilateur Cédille doit inclure cette licence dans son intégralité dans la documentation et le code source du fork.
+
+4. L'utilisation du langage C Cédille et du compilateur Cédille à des fins éducatives dans des établissements à but lucratif est interdite sans autorisation préalable du créateur originel.
+
+5. Cette licence est valable à partir de sa date de publication et pour une durée indéterminée, sauf si elle est révoquée par le créateur originel.
+
+6. Le créateur originel se réserve le droit de modifier les termes de cette licence à tout moment. Les nouvelles versions de la licence seront publiées avec un numéro de version mis à jour.
+
+7. Le langage de programmation C Cédille et le compilateur Cédille sont fournis "tels quels", sans aucune garantie expresse ou implicite quant à leur fonctionnement ou leur compatibilité avec d'autres logiciels.
+
+8. Le créateur originel décline toute responsabilité en cas de dommages directs, indirects, accessoires, spéciaux, exemplaires ou consécutifs découlant de l'utilisation du langage C Cédille ou du compilateur Cédille.
+
+9. Tout litige découlant de l'utilisation du langage C Cédille ou du compilateur Cédille sera régi par les lois en vigueur en France et sera soumis à la compétence exclusive des tribunaux de cette juridiction.
+
+10. Cette licence s'applique à l'ensemble du langage de programmation C Cédille et du compilateur Cédille, y compris toutes les parties constitutives, les bibliothèques, les modules, les fonctions et les structures de données qui en font partie. Toute utilisation, modification ou distribution de ces éléments est soumise aux termes de cette licence.
+
+En utilisant le langage C Cédille ou le compilateur Cédille, vous acceptez les termes de cette licence.
+
+© 2023 d4wae89d498 (sous pseudonyme). Tous droits réservés.
