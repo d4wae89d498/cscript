@@ -1,25 +1,9 @@
-class_meta_prototype(Tree,, (
-		(int, i)
-	),
-	(void, foo, ()),
-	(void, lol, ())
-);
+
+
+#import "tree.h"
 
 class_definition(Tree,,
 	((),
-		this->i = 42;
-	),
-	(void, foo, ()
-
-	),
-	(void, lol, ()
-
+		this->childs = 0;
 	)
 );
-
-
-auto t = Tree_construct();
-
-
-
-Tree_print(t, print_proprety);

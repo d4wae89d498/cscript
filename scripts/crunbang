@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [[ $# == "1" ]]; then
+	set -- "" "$1"
+	echo "?"
+fi;
+
+
+shebang=""
+count=0
+# Read each line from the file
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # Check if the line starts with #!
+    if [[ $line == '#!'* ]]; then
+        # Remove the #! and concatenate the line
+        shebang+="${line#\#!} "
+		 ((count++))
+    else
+        # Break the loop if the line does not start with #!
+        break
+    fi
+done < $2
+
+# Check if a shebang was found
+if [[ -n $shebang ]]; then
+    # Split the shebang into an array
+    interp=($shebang)
+else
+    # Default interpreter if no shebang was found
+    interp=(/bin/sh)
+fi
+
+tmp_dir=/tmp/.tmp_sh
+mkdir -p $tmp_dir
+tmp_name=/tmp/.tmp_sh/$2
+#echo sed "1,${count}d" $2
+sed "1,${count}d" $2 > $tmp_name
+
+
+args="${interp[@]:1}"
+
+./scripts/crun "$args" $tmp_name
+

@@ -1,14 +1,11 @@
-#!./scripts/crun "-g -fms-extensions -Wno-microsoft-anon-tag -lgc -Istd -include gc.h -DON_STARTUP=GC_INIT();"
-
+#!./scripts/crunbang -g -fms-extensions -Wno-microsoft-anon-tag
+#! -lgc -Istd -include gc.h -include cedilla.h
+#! -DON_STARTUP=GC_INIT();
 
 #import "cedilla.h"
-#import "std/std.m"
 
-auto math = ({
-	#include "std/math.m"
-});
+#import "std.m"
 
-print ( "pi is  ", math.pi, "\n");
 
 function(void, print_proprety, (char *type, void *data),
 	// TODO: use Any and class tree yo actually print the data pointer
@@ -16,9 +13,8 @@ function(void, print_proprety, (char *type, void *data),
 	print(" data: ", data, "\n")
 )
 
-#import "std/tree.m"
 
-class (Optional,, (
+class (Optional , , (
 		(int, 		x),
 		(float, 	y),
 		(char *, 	str)

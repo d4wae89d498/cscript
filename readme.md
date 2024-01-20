@@ -6,8 +6,8 @@ Current implementation relies on :
 - Clang
 - BDW GC (ARC ref couting is planned)
 
-This project was initially designed as a tool to build an extensive parser and AST macro system. The next goal is to use this CScript (aka Cedille [ç]) as a preprocessor for CScript (aka Cedille [ç])
-It is well-suited for rapid interoperability with low-level systems.
+This project was initially designed as a tool to build an extensive parser and AST macro system. The next goal is to use this CScript (aka Cedille [ç]) as a preprocessor for CScript (aka Cedille [ç]).
+It is well-suited for rapid interoperability with low-level.
 
 Usage :
 

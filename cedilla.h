@@ -1,6 +1,6 @@
 #ifndef CEDILLA_H
 # define CEDILLA_H
-# include <gc.h>
+
 # include <Block.h>
 
 struct Block_layout {
@@ -34,6 +34,7 @@ struct Block_layout {
 # define FOR_EACH_(N, what, ...) EXPAND(CONCATENATE(FOR_EACH_, N)(what, __VA_ARGS__))
 # define FOR_EACH(what, ...) FOR_EACH_(COUNT_ARGS(__VA_ARGS__), what, __VA_ARGS__)
 
+# define FOR_EACH2_0(what, extra_arg, x)
 # define FOR_EACH2_1(what, extra_arg, x) what(extra_arg, x)
 # define FOR_EACH2_2(what, extra_arg, x, ...) what(extra_arg, x) EXPAND(FOR_EACH2_1(what, extra_arg, __VA_ARGS__))
 # define FOR_EACH2_3(what, extra_arg, x, ...) EXPAND(what(extra_arg, x)) EXPAND(FOR_EACH2_2(what, extra_arg, __VA_ARGS__))
@@ -82,7 +83,8 @@ struct Block_layout {
 # define print_meta_propriety_(self, type, var)\
 	cb(STR(type), &(self -> var));
 
-# define class_meta_prototype(class_name, parent_class_name, properties, ...) \
+# define class_meta_prototype(...) _class_meta_prototype(__VA_ARGS__)
+# define _class_meta_prototype(class_name, parent_class_name, properties, ...) \
     typedef struct class_name class_name; \
 	struct  class_name {\
 			IF_ARGS((parent_class_name), parent_class_name;)\
@@ -95,8 +97,9 @@ struct Block_layout {
 		FOR_EACH2(print_meta_propriety, this, UNPACK properties) \
 	);
 
-
-# define class_definition(class_name, parent_class_name, constructor, ...) \
+# define class_definition(...) \
+	_class_definition(__VA_ARGS__)
+# define _class_definition(class_name, parent_class_name, constructor, ...) \
     __auto_type class_name##_construct = ^ class_name * CALL(FIRST_ARG, UNPACK constructor) {\
 		__block class_name * this = GC_MALLOC(sizeof(class_name));\
 		IF_ARGS((parent_class_name), \
@@ -121,13 +124,13 @@ struct Block_layout {
 
 # define _class(class_name, parent_class_name, properties, constructor, ...) \
 	/*class_prototype(class_name, parent_class_name, properties, __VA_ARGS__)*/\
-	class_meta_prototype(class_name, parent_class_name, properties, __VA_ARGS__)\
-	class_definition(class_name, parent_class_name, constructor, __VA_ARGS__)
+	_class_meta_prototype(class_name, parent_class_name, properties, __VA_ARGS__)\
+	_class_definition(class_name, parent_class_name, constructor, __VA_ARGS__)
 
 # define METHOD_PROTO(method_def) \
     EXPAND(METHOD_PROTO_ method_def)
 # define METHOD_PROTO_(ret_type, name, args, ...) \
-    typeof(^ ret_type args { (void)4;  }) name;
+    ret_type (^name) args;
 # define METHOD_SET(method_def) \
 	EXPAND(CALL(METHOD_SET_, UNPACK(EXPAND(UNPACK method_def))))
 # define METHOD_SET_(ret_type, name, args, ...) \
@@ -138,6 +141,22 @@ struct Block_layout {
 /*=======================================
  * A D D I T I O N A L	  K E Y W O R D S
  *=======================================*/
+#define print(...) FOR_EACH(_print_generic, __VA_ARGS__)
+#define _print_generic(x) printf(_Generic((x), \
+    int: "%d", \
+    long: "%ld", \
+    long long: "%lld", \
+    unsigned int: "%u", \
+    unsigned long: "%lu", \
+    unsigned long long: "%llu", \
+    float: "%f", \
+    double: "%f", \
+    char: "%c", \
+    char*: "%s", \
+    const char*: "%s", \
+    void*: "%p", \
+    default: "<Unknown type: %p>" \
+), x);
 
 # define raw_function(ret, name, args)\
 	(ret(*)(UNPACK args))(((struct Block_layout *)( void *)name)->invoke)
@@ -162,6 +181,10 @@ struct Block_layout {
 	ret (^name) args
 # define lambda(type, args, body)\
 	^ type args { body }
+# define function_prototype(type, name, args, body)\
+type (^name) args;
+# define function_definition(type, name, args, body)\
+name = ^type args { body };
 # define function(type, name, args, body)\
 	auto name = ^type args { body };
 # define local(name, value)\

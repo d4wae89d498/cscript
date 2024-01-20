@@ -1,27 +1,60 @@
 #!/bin/sh
-echo "Compilling [$@] ..."
+
 if [[ $# == "1" ]]; then
 	set -- "" "$1"
+	echo "?"
 fi;
+echo "Compilling [$@] ..."
+echo $1;
+
 counter=1
 read -r firstLine < "$2"
 if [[ $firstLine == "#!"* ]]; then
     ((counter++))
 fi
+tmp_dir=/tmp/.cedilla
+mkdir -p $tmp_dir
 file=$(cat $2 | sed '1d')
-tmp_name=.tmp_$(uuidgen)
+tmp_name=$tmp_dir/.tmp_$(date +%s)$(uuidgen)
+
+extract_path() {
+    local input="$1"
+    local path_pattern="/tmp/.tmp_sh/"
+
+    # Check if the input starts with the pattern
+    if [[ $input == $path_pattern* ]]; then
+        # Extract the part after the pattern
+        echo "${input#$path_pattern}"
+    else
+        # If the pattern is not found, return the input as is
+        echo "$input"
+    fi
+}
+
 cat > $tmp_name.c <<EOF
 #include <libc.h>
+#include <ctype.h>
+#include <stdbool.h>
 int main(int argc, char	**argv)
 {
 ON_STARTUP
-#line $counter "$2"
+#line $counter "$(extract_path "$2")"
 $file
 }
 EOF
-cc $(sed -e 's/^"//' -e 's/"$//' <<<"$1") $tmp_name.c -o $tmp_name.out && echo "done " && echo "________"
+#echo cc $(sed -e 's/^"//' -e 's/"$//' <<<"$1") $file
+cc -I$(pwd) $(sed -e 's/^"//' -e 's/"$//' <<<"$1") $tmp_name.c -o $tmp_name.out
+#exit;
+if [[ $? == "0" ]]; then
+	echo "Compilation succeed";
+else
+	echo "Compilation failed";
+fi;
+#&& echo "done " && echo "________"
 shift
 shift
-rm $tmp_name.c
-./$tmp_name.out $@
+#rm $tmp_name.c
+echo "Running [$tmp_name.out] ..."
+$tmp_name.out $@
+echo "Done."
 rm $tmp_name.out
