@@ -39,5 +39,6 @@ sed "1,${count}d" $2 > $tmp_name
 
 args="${interp[@]:1}"
 
-./scripts/crun "$args" $tmp_name
+
+./scripts/crun "$args" $tmp_name $count
 

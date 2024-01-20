@@ -4,3 +4,4 @@ class_meta_prototype(Any,, (
 	),
 	(bool, is_type, (char *type))
 );
+function_prototype(char	*,normalize_type,(char *type));
