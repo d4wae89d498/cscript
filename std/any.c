@@ -21,6 +21,8 @@ function(Any*, __check_any_cast, (Any *v, char *type),
 )
 
 // TODO : rewrite this function for a deeper suport of int short, short int etc. combinaisons.
+// Idea : sumply remove useless spaces and forbids multi words type (unsigned short etc..)
+
 function_definition(char	*,normalize_type,(char *type),
 
 	char	*o = GC_MALLOC(512);

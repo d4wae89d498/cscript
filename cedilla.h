@@ -1,9 +1,10 @@
 #ifndef CEDILLA_H
 # define CEDILLA_H
 # include <libc.h>
+# include <stdbool.h>
+# include <ctype.h>
 # include <assert.h>
-# include <stdint.h>
-# include <string.h>
+
 # include <gc.h>
 /*=======================================
  * C L A N G	B A S E D	C L O S U R E S
@@ -47,8 +48,11 @@ struct Block_layout {
 # define print_meta_propriety(self, prop)\
 	EXPAND(CALL(print_meta_propriety_, self, UNPACK(EXPAND(UNPACK prop))))
 
+// TODO: access by a propery using a string ?
+// TODO: return a normalized type
+
 # define print_meta_propriety_(self, type, var)\
-	cb(STR(type), &(self -> var));
+	cb(STR(type), STR(var), &(self -> var));
 
 # define class_meta_prototype(...) _class_meta_prototype(__VA_ARGS__)
 # define _class_meta_prototype(class_name, parent_class_name, properties, ...) \
@@ -60,7 +64,7 @@ struct Block_layout {
 			}; \
 			FOR_EACH(METHOD_PROTO, __VA_ARGS__) \
 	};\
-	auto class_name ## _print = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, void *data))),\
+	auto class_name ## _print = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
 		FOR_EACH2(print_meta_propriety, this, UNPACK properties) \
 	);
 
@@ -121,7 +125,7 @@ struct Block_layout {
 
 
 
-# define print(...) FOR_EACH(_print_generic, __VA_ARGS__)
+# define print(...) FOR_EACH(_print_generic, __VA_ARGS__, "\n")
 # define _print_generic(x) printf(_Generic((x), \
     int: "%d", \
     long: "%ld", \

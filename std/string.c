@@ -8,6 +8,12 @@ class_definition(String,,
 		return !strcmp(this->ptr, str);
 	)
 )
+
+function(String*, String_construct_raw, (char *ptr),
+         return String_construct(ptr, strlen(ptr));
+)
+
+/*
 // Optional argument for len. If not set, set it to strlen(ptr).
 #define String_construct(X, ...)\
 	IF_ARGS((__VA_ARGS__),\
@@ -16,3 +22,4 @@ class_definition(String,,
 	IF_NARGS((__VA_ARGS__),\
 		String_construct(X, strlen(X))\
 	)
+*/
