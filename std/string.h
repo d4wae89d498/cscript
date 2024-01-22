@@ -1,3 +1,5 @@
+#import "../cedilla.h"
+
 class_meta_prototype(String,,
 	(
 		(u64,	len),

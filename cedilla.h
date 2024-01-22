@@ -4,11 +4,12 @@
 # include <assert.h>
 # include <stdint.h>
 # include <string.h>
-
+# include <gc.h>
 /*=======================================
  * C L A N G	B A S E D	C L O S U R E S
  *=======================================*/
 # include <Block.h>
+
 
 struct Block_layout {
     void *isa;
@@ -243,7 +244,7 @@ void print_binary(void *data, size_t bytes)
 
 char	*_strdup(char *str)
 {
-	char *o = _malloc(strlen(str));
+	char *o = (char*)_malloc(strlen(str));
 	strcpy(o, str);
 	return o;
 }
