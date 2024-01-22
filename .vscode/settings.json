@@ -1,7 +1,0 @@
-{
-	"files.associations": {
-		"*.m": "objective-c",
-		"*.h": "objective-c",
-		"*.c": "objective-c"
-	}
-}
