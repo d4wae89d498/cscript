@@ -9,15 +9,30 @@
 #import "list.c"
 #import "tree.c"
 
+
+    class(Salut ,,
+          (
+            (int, toto)
+          ),
+          (
+          (int x),
+             this->toto = x;
+           ),
+           (void, make2x, (),
+                this->toto *= 2;
+           )
+    );
+
 export (
     String_construct,
-    String_construct_raw,
-    String_print,
+    String_meta,
    
     Any_construct,
     
     List_construct,
     
-    Tree_construct
+    Tree_construct,
+    
+    Salut_construct
 )
 

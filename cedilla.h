@@ -45,13 +45,12 @@ struct Block_layout {
 # define extract_meta_propriety_(type, var)\
 	type var;
 
-# define print_meta_propriety(self, prop)\
-	EXPAND(CALL(print_meta_propriety_, self, UNPACK(EXPAND(UNPACK prop))))
+# define meta_propriety(self, prop)\
+	EXPAND(CALL(meta_propriety_, self, UNPACK(EXPAND(UNPACK prop))))
 
-// TODO: access by a propery using a string ?
-// TODO: return a normalized type
+// TODO: use a normalized type
 
-# define print_meta_propriety_(self, type, var)\
+# define meta_propriety_(self, type, var)\
 	cb(STR(type), STR(var), &(self -> var));
 
 # define class_meta_prototype(...) _class_meta_prototype(__VA_ARGS__)
@@ -64,8 +63,8 @@ struct Block_layout {
 			}; \
 			FOR_EACH(METHOD_PROTO, __VA_ARGS__) \
 	};\
-	auto class_name ## _print = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
-		FOR_EACH2(print_meta_propriety, this, UNPACK properties) \
+	auto class_name ## _meta = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
+		FOR_EACH2(meta_propriety, this, UNPACK properties) \
 	);
 
 # define class_definition(...) \
