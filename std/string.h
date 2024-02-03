@@ -1,4 +1,3 @@
-#import "../cedilla.h"
 
 class_meta_prototype(String,,
 	(

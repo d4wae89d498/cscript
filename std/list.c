@@ -1,5 +1,4 @@
 
-
 class_definition(List,,
 	(							(),
 		this->next = NULL;
@@ -8,7 +7,7 @@ class_definition(List,,
 
 	(List *, 	first, 			(),
         List *it = this;
-     
+
         while (it)
         {
             if (!it->prev)
@@ -17,24 +16,24 @@ class_definition(List,,
         }
         return NULL;
     ),
-        
+
 	(List *, 	last, 			(),
 		List *it = this;
 		return NULL;
     ),
-    
+
 	(List *, 	add_back, 		(Any a),
 		return NULL;
 	),
-	
+
     (List *, 	add_front, 		(Any a),
 		return NULL;
 	),
-    
+
     (void, 		link_back, 		(List *lst),
 		return;
 	),
-    
+
 	(void, 		link_front, 	(List *lst),
 		return;
 	),
@@ -42,7 +41,7 @@ class_definition(List,,
 	(List *, 	get_by_index, 	(u64 idx),
         List    *it = this;
         u64     i = 0;
-     
+
         while (it && i < idx)
         {
             i += 1;
@@ -52,7 +51,7 @@ class_definition(List,,
         }
         return NULL;
     ),
-    
+
 	(void,		del_by_ptr, 	(List *ptr),
         List    *it = this;
 
@@ -60,16 +59,16 @@ class_definition(List,,
         {
             if (it == ptr)
             {
-                
+
             }
         }
         return;
     ),
-    
+
 	(List *,	clone, 			(),
         return NULL;
     ),
-    
+
 	(void,		free, 			(),
         return ;
     )

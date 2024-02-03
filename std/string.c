@@ -1,3 +1,4 @@
+
 class_definition(String,,
 	((char *ptr, u64 len),
 		this->ptr = GC_MALLOC(len);

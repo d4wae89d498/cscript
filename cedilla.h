@@ -6,7 +6,7 @@
 # include <assert.h>
 
 /*=======================================
- * G A R B A G E  C O L L E C T O R
+ * G A R B A G E   C O L L E C T I O N
  *=======================================*/
 # if defined(GC)
 #  include <gc.h>
@@ -20,15 +20,13 @@
 # endif
 
 /*=======================================
- * N E S T E D 		F U N C T I O N S
+ * N E S T E D   F U N C T I O N S
  *=======================================*/
 
 # define lambda(type, args, ...)\
 	lambda_emit(type, CONCATENATE(lambda_, __COUNTER__), args, __VA_ARGS__)
-
 # define METHOD_RELEASE_(type, name, args, ...)\
 	BLOCK_RELEASE(this->name)
-
 # define function_definition(type, name, args, ...)\
 	name = lambda(type, args, __VA_ARGS__);
 #  define function(type, name, args, ...)\
@@ -41,13 +39,10 @@
 # if !defined(__clang__)
 #  define function_prototype(type, name, args)\
 	type (*name) args;
-
 #  define function_ptr(type, name, args)\
 	(name)
-
 # define METHOD_SET_(type, name, args, ...) \
     this->name = lambda(type, args, __VA_ARGS__);
-
 # define BLOCK_RELEASE(name)
 # define lambda_emit(type, name, args, ...)				\
 	({													\
@@ -73,10 +68,8 @@ struct Block_layout {
 };
 #  define function_prototype(type, name, args)\
 	type (^name) args;
-
 # define function_ptr(type, name, args)\
 	(type(*)(UNPACK args))(((struct Block_layout *)( void *)name)->invoke)
-
 # define METHOD_SET_(ret_type, name, args, ...) \
     this->name = Block_copy(^ ret_type args {\
 		__VA_ARGS__\
@@ -96,11 +89,21 @@ struct Block_layout {
 /*=======================================
  * C L A S S	S Y S T E M
  *=======================================*/
+
+typedef struct s_cmap
+{
+	const char 	*name;
+	struct s_cmap	*parent;
+}	cmap;
+
+#define RESEVED_CID (u64[3]) {0b10110011, 0b01110111, 0b11001101}
+
 // TODO : meta func & register in a tree for having is+instance of ...
 # define class(...) _class(__VA_ARGS__)
 # define super(...)\
 	({\
-		(__parent = __parent_constructor(__VA_ARGS__));\
+		superCalled = true;\
+	 	(__parent = __parent_constructor(__VA_ARGS__));\
 		memcpy(this, __parent, sizeof(*__parent));\
 		__parent;\
 	})
@@ -116,6 +119,7 @@ struct Block_layout {
 				function_prototype(void, delete, ())\
 			)\
 	};
+
 
 # define extract_meta_propriety(prop)\
 	EXPAND(extract_meta_propriety_ prop)
@@ -135,6 +139,7 @@ struct Block_layout {
 # define _class_meta_prototype(class_name, parent_class_name, properties, ...) \
     typedef struct class_name class_name; \
 	struct  class_name {\
+			IF_NARGS((parent_class_name), typeof(RESEVED_CID) reserved;)\
 			IF_ARGS((parent_class_name), parent_class_name;)\
 			struct {\
 				FOR_EACH(extract_meta_propriety, UNPACK properties) \
@@ -144,6 +149,15 @@ struct Block_layout {
 				function_prototype(void, delete, ())\
 			)\
 	};\
+	cmap CONCATENATE(class_name, _cmap) = (cmap) {\
+		.name = STR(class_name),\
+		IF_ARGS((parent_class_name),\
+			.parent = & CONCATENATE(parent_class_name, _cmap) \
+		)\
+		IF_NARGS((parent_clas_name),\
+			.parent = NULL \
+		)\
+	};
 //	auto class_name ## _meta = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
 //		FOR_EACH2(meta_propriety, this, UNPACK properties) \
 //	);
@@ -153,14 +167,22 @@ struct Block_layout {
 
 # define _class_definition(class_name, parent_class_name, constructor, ...) \
     function(class_name *, class_name ## _construct, CALL(FIRST_ARG, UNPACK constructor), \
+		bool superCalled = false;\
 		class_name * this = GC_MALLOC(sizeof(class_name));\
 		IF_ARGS((parent_class_name), \
 			typeof(parent_class_name ## _construct)  __parent_constructor = parent_class_name ## _construct;\
 			parent_class_name *__parent = NULL;\
 		);\
 		FOR_EACH(METHOD_SET, __VA_ARGS__) \
-	   	CALL(REST_ARGS, UNPACK constructor)\
-	   	IF_ARGS((parent_class_name), \
+	   	IF_NARGS((parent_class_name),\
+			memcpy(this->reserved, RESEVED_CID, sizeof(RESEVED_CID));\
+		)\
+		CALL(REST_ARGS, UNPACK constructor)\
+		IF_ARGS((parent_class_name),\
+			if (!superCalled)\
+				exit(!!PRINT("Error: super was not called.\n"));\
+		)\
+		IF_ARGS((parent_class_name), \
 			if (__parent)\
 				__parent->delete();\
 		);\
@@ -205,7 +227,32 @@ struct Block_layout {
 
 
 # define print(...) FOR_EACH(_print_generic, __VA_ARGS__, "\n")
-# define _print_generic(x) printf(_Generic((x), \
+
+
+# define is_class
+
+/*
+ 
+
+ * */
+
+# define _print_generic(x) \
+	if (__builtin_classify_type(x) == 5)\
+	{\
+		void *y = (void*) (u64)x;\
+		printf("size: %zu\n", sizeof(RESEVED_CID));\
+		_Pragma("");\
+		_Pragma("GCC diagnostic push");\
+		_Pragma("GCC diagnostic ignored \"-Wstringop-overread\"");\
+		void *src = y;\
+		if (!memcmp(src, RESEVED_CID, sizeof(RESEVED_CID)))\
+		{\
+			printf("We got our class...");\
+		}\
+		_Pragma("GCC diagnostic pop");\
+		printf("We got a ptr\n");\
+	}\
+printf(_Generic((x), \
     int: "%d", \
     long: "%ld", \
     long long: "%lld", \
@@ -262,7 +309,7 @@ struct Block_layout {
 # define GET_BIT(VAR, POS) (!!((VAR) & (1ULL << (POS))))
 
 /*=======================================
- * 	L O G G I N G
+ * L O G G I N G
  *=======================================*/
 # define PRINT(...) 							\
 	((dprintf(STDERR_FILENO, "[%s:%i]\t", __FILE__, __LINE__)\

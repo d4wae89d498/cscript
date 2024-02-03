@@ -1,15 +1,17 @@
+#include "any.h"
+#include "list.h"
+#include "tree.h"
+#include "string.h"
 
-#import "string.h"
-#import "any.h"
-#import "list.h"
-#import "tree.h"
 
 
-#import "string.c"
-#import "any.c"
-#import "list.c"
-#import "tree.c"
+#include "any.c"
+#include "list.c"
+#include "tree.c"
+#include "string.c"
 
+
+auto class_prototypes = Tree_construct();
 
     class(Salut ,,
           (
@@ -27,6 +29,8 @@
 export (
     String_construct,
 //    String_meta,
+
+    Tree_cmap,
 
     Any_construct,
 

@@ -16,6 +16,7 @@
 		"complex": "c",
 		"functional": "c",
 		"utility": "c",
-		"typeinfo": "c"
+		"typeinfo": "c",
+		"span": "c"
 	}
 }

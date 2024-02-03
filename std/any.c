@@ -1,4 +1,3 @@
-#import "any.h"
 
 
 // TODO : rewrite this function for a deeper suport of int short, short int etc. combinaisons.

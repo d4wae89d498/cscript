@@ -18,7 +18,7 @@ int main()
     GC_INIT();
 
 
-
+	print("parent of Tree is : ", std.Tree_cmap.parent->name);
 
 
     print("______");
@@ -30,6 +30,7 @@ int main()
 
     auto montruc = std.Salut_construct(5);
 
+    print("succes ? ", montruc);
 
 
     print(montruc->toto, " une string ", 3.14);
