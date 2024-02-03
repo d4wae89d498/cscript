@@ -8,7 +8,6 @@
 /*=======================================
  * G A R B A G E  C O L L E C T O R
  *=======================================*/
-
 # if defined(GC)
 #  include <gc.h>
 # endif
@@ -34,6 +33,7 @@
 	name = lambda(type, args, __VA_ARGS__);
 # define METHOD_RELEASE_(type, name, args, ...)\
 	BLOCK_RELEASE(this->name)
+
 /*=======================================
  * G C C   F U N C T I O N A L
  *=======================================*/
@@ -54,7 +54,6 @@
 # define BLOCK_RELEASE(name)
 
 #endif
-
 
 /*=======================================
  * C L A N G   F U N C T I O N A L
@@ -90,9 +89,7 @@ struct Block_layout {
 /*=======================================
  * C L A S S	S Y S T E M
  *=======================================*/
-// todo : registers classes in an a tree
-
-// TODO : Do memcopy during super call. Handle cases like useless alloc for parents, and other class construct in constructors
+// TODO : meta func & register in a tree for having is+instance of ...
 # define class(...) _class(__VA_ARGS__)
 # define super(...)\
 	({\
@@ -185,7 +182,6 @@ struct Block_layout {
 /*=======================================
  * A D D I T I O N A L	  K E Y W O R D S
  *=======================================*/
-
 # define u64 uint64_t
 # define u32 uint32_t
 # define u16 uint16_t
@@ -250,7 +246,6 @@ struct Block_layout {
 /*=======================================
  *  B I N A R Y
  *=======================================*/
-
 # define SET_BIT(VAR, POS) ((VAR) |= (1ULL << (POS)))
 # define CLEAR_BIT(VAR, POS) ((VAR) &= ~(1ULL << (POS)))
 # define TOGGLE_BIT(VAR, POS) ((VAR) ^= (1ULL << (POS)))
@@ -259,8 +254,6 @@ struct Block_layout {
 /*=======================================
  * 	L O G G I N G
  *=======================================*/
-
-
 # define PRINT(...) 							\
 	((dprintf(STDERR_FILENO, "[%s:%i]\t", __FILE__, __LINE__)\
 + 												\
@@ -303,9 +296,7 @@ void print_binary(void *data, size_t bytes)
 /*=======================================
  *  M E M O R Y
  *=======================================*/
-
 // TODO: create a class for file with fd beeing a private field. On destroy, add a gc hook to close the file.
-
 # define _malloc GC_MALLOC
 # define _realloc GC_REALLOC
 # define _open open
@@ -396,7 +387,6 @@ void	*_assign(void *ptr, void *data, size_t size_of_data)
 /*=======================================
  * M A C R O	P R I M I T I V E S
  *=======================================*/
-
 # define FIRST_ARG(X, ...) X
 # define REST_ARGS(X, ...) __VA_ARGS__
 # define STR(X) #X
