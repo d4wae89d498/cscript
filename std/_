@@ -25,14 +25,14 @@
 
 export (
     String_construct,
-    String_meta,
-   
+//    String_meta,
+
     Any_construct,
-    
+
     List_construct,
-    
+
     Tree_construct,
-    
+
     Salut_construct
 )
 

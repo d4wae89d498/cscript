@@ -285,6 +285,7 @@
 					"-Wno-microsoft-anon-tag",
 					"-fms-extensions",
 					"-I/usr/local/Cellar/bdw-gc/8.2.4/include",
+					"-fnested-functions",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -311,6 +312,7 @@
 					"-Wno-microsoft-anon-tag",
 					"-fms-extensions",
 					"-I/usr/local/Cellar/bdw-gc/8.2.4/include",
+					"-fnested-functions",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

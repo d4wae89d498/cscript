@@ -5,13 +5,62 @@
 # include <ctype.h>
 # include <assert.h>
 
-# include <gc.h>
 /*=======================================
- * C L A N G	B A S E D	C L O S U R E S
+ * G A R B A G E  C O L L E C T O R
  *=======================================*/
-# include <Block.h>
+
+# if defined(GC)
+#  include <gc.h>
+# endif
+
+# if !defined(GC)
+#  define GC_MALLOC malloc
+#  define GC_REALLOC realloc
+#  define GC_FREE free
+#  define GC_INIT()
+# endif
+
+/*=======================================
+ * N E S T E D 		F U N C T I O N S
+ *=======================================*/
+# define lambda_emit(type, name, args, ...)				\
+	({													\
+		function(type, name, args, __VA_ARGS__)			\
+		name;											\
+	})
+# define lambda(type, args, ...)\
+	lambda_emit(type, CONCATENATE(lambda_, __COUNTER__), args, __VA_ARGS__)
+# define function_definition(type, name, args, ...)\
+	name = lambda(type, args, __VA_ARGS__);
+# define METHOD_RELEASE_(type, name, args, ...)\
+	BLOCK_RELEASE(this->name)
+/*=======================================
+ * G C C   F U N C T I O N A L
+ *=======================================*/
+# if !defined(__clang__)
+#  define function_prototype(type, name, args)\
+	type (*name) args;
+
+#  define function_ptr(type, name, args)\
+	(name)
+#  define function(type, name, args, ...)\
+	type name args \
+	{\
+		__VA_ARGS__\
+	}
+# define METHOD_SET_(type, name, args, ...) \
+    this->name = lambda(type, name, args, __VA_ARGS__);
+
+# define BLOCK_RELEASE(name)
+
+#endif
 
 
+/*=======================================
+ * C L A N G   F U N C T I O N A L
+ *=======================================*/
+#if defined(__clang__)
+# include "Block.h"
 struct Block_layout {
     void *isa;
     int flags;
@@ -19,6 +68,24 @@ struct Block_layout {
     void (*invoke)();//TODO: check if void* as first arg is a better option
     struct Block_descriptor *descriptor;
 };
+
+#  define function_prototype(type, name, args)\
+	type (^name) args;
+
+# define function_ptr(type, name, args)\
+	(type(*)(UNPACK args))(((struct Block_layout *)( void *)name)->invoke)
+
+#  define function(type, name, args, ...)\
+	auto name = ^ type args { __VA_ARGS__ };
+
+# define METHOD_SET_(ret_type, name, args, ...) \
+    this->name = Block_copy(^ ret_type args {\
+		__VA_ARGS__\
+	});
+
+# define BLOCK_RELEASE(name)\
+	Block_release(name);
+#endif
 
 /*=======================================
  * C L A S S	S Y S T E M
@@ -28,7 +95,11 @@ struct Block_layout {
 // TODO : Do memcopy during super call. Handle cases like useless alloc for parents, and other class construct in constructors
 # define class(...) _class(__VA_ARGS__)
 # define super(...)\
-	(parent = __parent_constructor(__VA_ARGS__))
+	({\
+		(__parent = __parent_constructor(__VA_ARGS__));\
+		memcpy(this, __parent, sizeof(*__parent));\
+		__parent;\
+	})
 # define class_prototype(class_name, parent_class_name, properties, ...) \
     typedef struct class_name class_name; \
 	struct  class_name {\
@@ -62,35 +133,40 @@ struct Block_layout {
 				FOR_EACH(extract_meta_propriety, UNPACK properties) \
 			}; \
 			FOR_EACH(METHOD_PROTO, __VA_ARGS__) \
+			IF_NARGS((parent_class_name),\
+				function_prototype(void, delete, ())\
+			)\
 	};\
-	auto class_name ## _meta = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
-		FOR_EACH2(meta_propriety, this, UNPACK properties) \
-	);
+//	auto class_name ## _meta = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
+//		FOR_EACH2(meta_propriety, this, UNPACK properties) \
+//	);
 
 # define class_definition(...) \
 	_class_definition(__VA_ARGS__)
+
 # define _class_definition(class_name, parent_class_name, constructor, ...) \
-    __auto_type class_name##_construct = ^ class_name * CALL(FIRST_ARG, UNPACK constructor) {\
-		__block class_name * this = GC_MALLOC(sizeof(class_name));\
+    function(class_name *, class_name ## _construct, CALL(FIRST_ARG, UNPACK constructor), \
+		class_name * this = GC_MALLOC(sizeof(class_name));\
 		IF_ARGS((parent_class_name), \
 			typeof(parent_class_name ## _construct)  __parent_constructor = parent_class_name ## _construct;\
-			parent_class_name *parent;\
+			parent_class_name *__parent = NULL;\
 		);\
-		Tree t;\
 		FOR_EACH(METHOD_SET, __VA_ARGS__) \
 	   	CALL(REST_ARGS, UNPACK constructor)\
 	   	IF_ARGS((parent_class_name), \
-	   		printf("parent copied from %s (%p) to %s (%p)\n", STR(parent_class_name), this, STR(class_name), parent);\
-			memcpy(this, parent, sizeof(parent_class_name));\
+			if (__parent)\
+				__parent->delete();\
 		);\
 		printf("[this is %p]\n", this);\
-		function(void, defaultDestructor, (void *obj, class_name *o2, void *data),\
-			/*print("Destrouying", o2, "\n");*/\
-			/*TODO: find why this dont leaks to fix this destructor with Block_release(obj) for class methods;*/\
-		);\
-		GC_REGISTER_FINALIZER(this, raw_function(void,defaultDestructor,(void*, void*)),NULL, NULL, NULL);\
+		IF_ARGS((parent_class_name),\
+			BLOCK_RELEASE(this->delete);\
+		)\
+		METHOD_SET((void, delete, (),\
+			FOR_EACH(METHOD_RELEASE, __VA_ARGS__) \
+			free(this);\
+		))\
 	   	return this;\
-    };
+	);
 
 # define _class(class_name, parent_class_name, properties, constructor, ...) \
 	/*class_prototype(class_name, parent_class_name, properties, __VA_ARGS__)*/\
@@ -100,13 +176,11 @@ struct Block_layout {
 # define METHOD_PROTO(method_def) \
     EXPAND(METHOD_PROTO_ method_def)
 # define METHOD_PROTO_(ret_type, name, args, ...) \
-    ret_type (^name) args;
+    function_prototype(ret_type, name, args)
 # define METHOD_SET(method_def) \
 	EXPAND(CALL(METHOD_SET_, UNPACK(EXPAND(UNPACK method_def))))
-# define METHOD_SET_(ret_type, name, args, ...) \
-    this->name = Block_copy(^ ret_type args {\
-		__VA_ARGS__\
-	});
+# define METHOD_RELEASE(method_def) \
+	EXPAND(CALL(METHOD_RELEASE_, UNPACK(EXPAND(UNPACK method_def))))
 
 /*=======================================
  * A D D I T I O N A L	  K E Y W O R D S
@@ -141,8 +215,8 @@ struct Block_layout {
     default: "<Unknown type: %p>" \
 ), x);
 
-# define raw_function(ret, name, args)\
-	(ret(*)(UNPACK args))(((struct Block_layout *)( void *)name)->invoke)
+
+
 # define auto __auto_type
 # define extends ,
 # define inst(X)		X,
@@ -160,16 +234,8 @@ struct Block_layout {
 		FOR_EACH(inst, __VA_ARGS__)\
 	};\
 	(typeof(name)) name;
-# define lambda_ptr(ret, name, args)\
-	ret (^name) args
-# define lambda(type, args, body)\
-	^ type args { body }
-# define function_prototype(type, name, args)\
-type (^name) args;
-# define function_definition(type, name, args, body)\
-name = ^type args { body };
-# define function(type, name, args, body)\
-	auto name = ^type args { body };
+
+
 # define local(name, value)\
 	auto name = value;
 # define global(name, value)\
