@@ -22,17 +22,18 @@
 /*=======================================
  * N E S T E D 		F U N C T I O N S
  *=======================================*/
-# define lambda_emit(type, name, args, ...)				\
-	({													\
-		function(type, name, args, __VA_ARGS__)			\
-		name;											\
-	})
+
 # define lambda(type, args, ...)\
 	lambda_emit(type, CONCATENATE(lambda_, __COUNTER__), args, __VA_ARGS__)
-# define function_definition(type, name, args, ...)\
-	name = lambda(type, args, __VA_ARGS__);
+
 # define METHOD_RELEASE_(type, name, args, ...)\
 	BLOCK_RELEASE(this->name)
+
+# define function_definition(type, name, args, ...)\
+	name = lambda(type, args, __VA_ARGS__);
+#  define function(type, name, args, ...)\
+	function_prototype(type, name, args);\
+	function_definition(type, name, args, __VA_ARGS__);\
 
 /*=======================================
  * G C C   F U N C T I O N A L
@@ -43,16 +44,19 @@
 
 #  define function_ptr(type, name, args)\
 	(name)
-#  define function(type, name, args, ...)\
-	type name args \
-	{\
-		__VA_ARGS__\
-	}
+
 # define METHOD_SET_(type, name, args, ...) \
-    this->name = lambda(type, name, args, __VA_ARGS__);
+    this->name = lambda(type, args, __VA_ARGS__);
 
 # define BLOCK_RELEASE(name)
-
+# define lambda_emit(type, name, args, ...)				\
+	({													\
+		type name args									\
+		{												\
+			 __VA_ARGS__								\
+		};												\
+		name;											\
+	})
 #endif
 
 /*=======================================
@@ -67,23 +71,26 @@ struct Block_layout {
     void (*invoke)();//TODO: check if void* as first arg is a better option
     struct Block_descriptor *descriptor;
 };
-
 #  define function_prototype(type, name, args)\
 	type (^name) args;
 
 # define function_ptr(type, name, args)\
 	(type(*)(UNPACK args))(((struct Block_layout *)( void *)name)->invoke)
 
-#  define function(type, name, args, ...)\
-	auto name = ^ type args { __VA_ARGS__ };
-
 # define METHOD_SET_(ret_type, name, args, ...) \
     this->name = Block_copy(^ ret_type args {\
 		__VA_ARGS__\
 	});
-
 # define BLOCK_RELEASE(name)\
 	Block_release(name);
+# define lambda_emit(type, name, args, ...)				\
+	({													\
+		auto name = ^type args							\
+		{												\
+			 __VA_ARGS__								\
+		};												\
+		name;											\
+	})
 #endif
 
 /*=======================================
@@ -105,6 +112,9 @@ struct Block_layout {
 				properties\
 			}; \
 			FOR_EACH(METHOD_PROTO, __VA_ARGS__) \
+			IF_NARGS((parent_class_name),\
+				function_prototype(void, delete, ())\
+			)\
 	};
 
 # define extract_meta_propriety(prop)\
