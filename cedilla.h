@@ -37,8 +37,10 @@
  * G C C   F U N C T I O N A L
  *=======================================*/
 # if !defined(__clang__)
+#  define IF_GCC(...) __VA_ARGS__
+#  define IF_CLANG(...) 
 #  define function_prototype(type, name, args)\
-	type (*name) args;
+	type (*name) args
 #  define function_ptr(type, name, args)\
 	(name)
 # define METHOD_SET_(type, name, args, ...) \
@@ -58,6 +60,8 @@
  * C L A N G   F U N C T I O N A L
  *=======================================*/
 #if defined(__clang__)
+#  define IF_GCC(...) 
+#  define IF_CLANG(...) __VA_ARGS__
 # include "Block.h"
 struct Block_layout {
     void *isa;
@@ -67,7 +71,7 @@ struct Block_layout {
     struct Block_descriptor *descriptor;
 };
 #  define function_prototype(type, name, args)\
-	type (^name) args;
+	type (^name) args
 # define function_ptr(type, name, args)\
 	(type(*)(UNPACK args))(((struct Block_layout *)( void *)name)->invoke)
 # define METHOD_SET_(ret_type, name, args, ...) \
@@ -139,14 +143,17 @@ typedef struct s_cmap
 # define _class_meta_prototype(class_name, parent_class_name, properties, ...) \
     typedef struct class_name class_name; \
 	struct  class_name {\
-			IF_NARGS((parent_class_name), typeof(RESEVED_CID) reserved;)\
+			IF_NARGS((parent_class_name),\
+				typeof(RESEVED_CID) reserved;\
+				METHOD_PROTO_(void, meta, (function_prototype(void, cb, (const char *type, const char *name, void *data ))),);\
+			)\
 			IF_ARGS((parent_class_name), parent_class_name;)\
 			struct {\
 				FOR_EACH(extract_meta_propriety, UNPACK properties) \
 			}; \
 			FOR_EACH(METHOD_PROTO, __VA_ARGS__) \
 			IF_NARGS((parent_class_name),\
-				function_prototype(void, delete, ())\
+				function_prototype(void, delete, ());\
 			)\
 	};\
 	cmap CONCATENATE(class_name, _cmap) = (cmap) {\
@@ -157,18 +164,21 @@ typedef struct s_cmap
 		IF_NARGS((parent_clas_name),\
 			.parent = NULL \
 		)\
-	};
-//	auto class_name ## _meta = lambda(void, (class_name *this, lambda_ptr(void,  cb, (char *type, char *name, void *data))),\
-//		FOR_EACH2(meta_propriety, this, UNPACK properties) \
-//	);
+	};\
+	auto CONCATENATE(class_name,  _meta) = lambda(void, (class_name *this, function_prototype(void,  cb, (const char *type, const char *name, void *data))),\
+		FOR_EACH2(meta_propriety, this, UNPACK properties) \
+	);
 
 # define class_definition(...) \
 	_class_definition(__VA_ARGS__)
 
 # define _class_definition(class_name, parent_class_name, constructor, ...) \
     function(class_name *, class_name ## _construct, CALL(FIRST_ARG, UNPACK constructor), \
+		auto tmp = lambda(class_name *, (), \
 		bool superCalled = false;\
-		class_name * this = GC_MALLOC(sizeof(class_name));\
+		static class_name * this;\
+		if (!this)\
+			this = GC_MALLOC(sizeof(class_name));\
 		IF_ARGS((parent_class_name), \
 			typeof(parent_class_name ## _construct)  __parent_constructor = parent_class_name ## _construct;\
 			parent_class_name *__parent = NULL;\
@@ -190,11 +200,17 @@ typedef struct s_cmap
 		IF_ARGS((parent_class_name),\
 			BLOCK_RELEASE(this->delete);\
 		)\
+		METHOD_SET_(void, meta, (function_prototype(void, cb, (const char *type, const char *name, void *data ))),\
+			printf("meta on %p\n", this);\
+			/*CONCATENATE(class_name, _meta)(this, cb);*/\
+		);\
 		METHOD_SET((void, delete, (),\
 			FOR_EACH(METHOD_RELEASE, __VA_ARGS__) \
 			free(this);\
 		))\
-	   	return this;\
+		return this;\
+		);\
+	   	return tmp();\
 	);
 
 # define _class(class_name, parent_class_name, properties, constructor, ...) \
@@ -205,7 +221,7 @@ typedef struct s_cmap
 # define METHOD_PROTO(method_def) \
     EXPAND(METHOD_PROTO_ method_def)
 # define METHOD_PROTO_(ret_type, name, args, ...) \
-    function_prototype(ret_type, name, args)
+    function_prototype(ret_type, name, args);
 # define METHOD_SET(method_def) \
 	EXPAND(CALL(METHOD_SET_, UNPACK(EXPAND(UNPACK method_def))))
 # define METHOD_RELEASE(method_def) \
@@ -235,22 +251,23 @@ typedef struct s_cmap
  
 
  * */
-
+// the memcmp bellow fire a gcc warning, we ignorre it. 
 # define _print_generic(x) \
 	if (__builtin_classify_type(x) == 5)\
 	{\
 		void *y = (void*) (u64)x;\
-		printf("size: %zu\n", sizeof(RESEVED_CID));\
-		_Pragma("");\
-		_Pragma("GCC diagnostic push");\
-		_Pragma("GCC diagnostic ignored \"-Wstringop-overread\"");\
+		IF_GCC(\
+			_Pragma("GCC diagnostic push");\
+			_Pragma("GCC diagnostic ignored \"-Wstringop-overread\"");\
+		)\
 		void *src = y;\
 		if (!memcmp(src, RESEVED_CID, sizeof(RESEVED_CID)))\
 		{\
-			printf("We got our class...");\
+			printf("We got our class...\n");\
 		}\
-		_Pragma("GCC diagnostic pop");\
-		printf("We got a ptr\n");\
+		IF_GCC(\
+			_Pragma("GCC diagnostic pop");\
+		)\
 	}\
 printf(_Generic((x), \
     int: "%d", \

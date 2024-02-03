@@ -20,26 +20,22 @@ auto class_prototypes = Tree_construct();
           (
           (int x),
              this->toto = x;
+	     this->make2x();
            ),
            (void, make2x, (),
                 this->toto *= 2;
+		printf("andtoto is..%i\n", this->toto);
            )
     );
 
 export (
     String_construct,
-//    String_meta,
-
+    String_meta,
     Tree_cmap,
-
     Any_construct,
-
     List_construct,
-
     Tree_construct,
-
-
-
-	Salut_construct
+    Salut_construct,
+    Salut_meta
 )
 

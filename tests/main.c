@@ -30,9 +30,45 @@ int main()
 
     auto montruc = std.Salut_construct(5);
 
-    print("succes ? ", montruc);
+	std.Salut_meta(montruc, lambda(void, (const char*type, const char*name, void *d),
+		//printf("okok");
+	print("--name: ", name);
+	print("--type: ", type);
+	));
 
+	printf("this was %p\n", montruc);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    printf("montruc was.. %p\n", montruc);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
 
+//	exit(0);
+
+   auto t = std.Tree_construct();
+
+    montruc->make2x();
+    printf("%i\n", montruc->toto);
+//   print("succes ? ", montruc);
+ //  printf("--%p\n", montruc); 
+//    montruc->meta(lambda(void, (const char *name, const char *type, void *data),
+//	print("--name: ", name);
+//	print("--type: ", type);
+ //  ));
+
+/*
     print(montruc->toto, " une string ", 3.14);
 
     montruc->make2x();
@@ -54,5 +90,5 @@ int main()
 
 //    any_cast(time_t, any_int);
     assert(n2 == n1);
-
+*/
 }
