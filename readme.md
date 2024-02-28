@@ -4,7 +4,7 @@ This repository contains the initial release of a c superset that is built using
 
 Current implementation relies on :
 - Clang
-- BDW GC (ARC ref couting is planned
+- BDW GC 
 
 
 Usage :
