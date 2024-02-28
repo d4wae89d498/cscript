@@ -4,10 +4,8 @@ This repository contains the initial release of a c superset that is built using
 
 Current implementation relies on :
 - Clang
-- BDW GC (ARC ref couting is planned)
+- BDW GC (ARC ref couting is planned
 
-This project was initially designed as a tool to build an extensive parser and AST macro system. The next goal is to use this CScript (aka Cedille [ç]) as a preprocessor for CScript (aka Cedille [ç]).
-It is well-suited for rapid interoperability with low-level.
 
 Usage :
 
@@ -20,7 +18,6 @@ Usage :
 
 .m extension is here for a better IDE compatibility as we are using clang blocks. We instead experimented with GCC nested functions, but found that the flexibility of variable lifetimes was significantly reduced.
 
-Our long-term goal is to compile language into TinyCC-compatible, pure C code for embedded development.
 
 ## Class syntax
 
