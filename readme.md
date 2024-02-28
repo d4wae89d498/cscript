@@ -86,7 +86,7 @@ lambda ([lambda type], ([lambda args]),
 // see todo file
 
 
-## GC custom free hooks
+## BDW GC custom free hooks
 
 ```C
 	GC_REGISTER_FINALIZER([ptr], raw_function(void,[destructor name],(void*, void*)),NULL, NULL, NULL);\
