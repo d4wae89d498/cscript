@@ -16,7 +16,6 @@ Usage :
 
 ```
 
-.m extension is here for a better IDE compatibility as we are using clang blocks. We instead experimented with GCC nested functions, but found that the flexibility of variable lifetimes was significantly reduced.
 
 
 ## Class syntax
