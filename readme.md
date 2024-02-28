@@ -1,4 +1,4 @@
-### CScript (aka Cedille [ç])
+### CScript
 
 This repository contains the initial release of a c superset that is built using C Macros only. It is just an experiments about abusing C PreProcessor.
 
